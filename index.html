@@ -3,80 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IDLEB FPI </title>
+    <title>IDLEB FPI | ULTRA AI Security System</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<div class="top-bar">
-    <span><i class="fas fa-shield-alt"></i> Official Syrian AI Crime Prevention</span>
-    <span id="userStatus"><i class="fas fa-user-lock"></i> Not logged in</span>
+<!-- Animated Background -->
+<div class="bg-animation">
+    <div class="grid-overlay"></div>
+    <div class="particles"></div>
 </div>
 
-<header>
-    <div class="logo-area">
-        <div class="avatar-circle">
-            <img src="https://i.postimg.cc/hGtg4Kx3/IMG-20260430-084400-653.jpg" alt="IDLEB Director">
+<!-- Sidebar Navigation -->
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="logo-icon">
+            <i class="fas fa-shield-virus"></i>
         </div>
         <div class="logo-text">
-            <h1>IDLEB <span>FPI</span></h1>
-            <p>Forensic Pattern Intelligence</p>
+            <h2>IDLEB <span>FPI</span></h2>
+            <p>v4.0 • SECURE</p>
         </div>
     </div>
-    <nav>
-        <ul>
-            <li><a href="#" data-page="home" class="active">Home</a></li>
-            <li><a href="#" data-page="dashboard">Dashboard</a></li>
-            <li><a href="#" data-page="database">Database</a></li>
-            <li><a href="#" data-page="audit">Audit Log</a></li>
-        </ul>
+    
+    <nav class="sidebar-nav">
+        <a href="#" data-page="home" class="nav-item active">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+            <div class="nav-badge">Live</div>
+        </a>
+        <a href="#" data-page="sketch" class="nav-item">
+            <i class="fas fa-robot"></i>
+            <span>AI Sketch</span>
+        </a>
+        <a href="#" data-page="database" class="nav-item">
+            <i class="fas fa-database"></i>
+            <span>Criminals DB</span>
+            <div class="nav-badge" id="criminalCount">0</div>
+        </a>
+        <a href="#" data-page="identities" class="nav-item">
+            <i class="fas fa-id-card"></i>
+            <span>National IDs</span>
+        </a>
+        <a href="#" data-page="audit" class="nav-item">
+            <i class="fas fa-history"></i>
+            <span>Audit Log</span>
+        </a>
+        <a href="#" data-page="analytics" class="nav-item">
+            <i class="fas fa-chart-line"></i>
+            <span>Analytics</span>
+        </a>
     </nav>
-    <div class="header-actions" id="authButtons">
-        <button class="btn-outline" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
-        <button class="btn-primary" id="registerBtn"><i class="fas fa-user-plus"></i> Register</button>
-        <button class="btn-outline" id="logoutBtn" style="display:none;"><i class="fas fa-sign-out-alt"></i> Logout</button>
-    </div>
-</header>
-
-<!-- Modal لنماذج التسجيل وتسجيل الدخول -->
-<div id="authModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <div id="loginForm">
-            <h3>Login to IDLEB FPI</h3>
-            <input type="text" id="loginUsername" placeholder="Username">
-            <input type="password" id="loginPassword" placeholder="Password">
-            <button id="doLogin">Login</button>
+    
+    <div class="sidebar-footer">
+        <div class="user-info" id="sidebarUserInfo">
+            <div class="avatar-sm">
+                <img src="https://i.postimg.cc/hGtg4Kx3/IMG-20260430-084400-653.jpg" alt="User">
+            </div>
+            <div class="user-details">
+                <span id="userNameDisplay">Guest</span>
+                <small id="userRoleDisplay">Not logged in</small>
+            </div>
         </div>
-        <div id="registerForm" style="display:none;">
-            <h3>Register New Account</h3>
-            <input type="text" id="regFullname" placeholder="Full Name">
+        <button class="logout-btn" id="sidebarLogoutBtn" style="display:none;">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+        </button>
+        <button class="login-btn" id="sidebarLoginBtn">
+            <i class="fas fa-key"></i>
+            Login
+        </button>
+    </div>
+</aside>
+
+<!-- Main Content -->
+<main class="main-content">
+    <div class="content-header">
+        <div class="header-left">
+            <h1 id="pageTitle">Intelligence Dashboard</h1>
+            <p id="pageSubtitle">Real-time criminal identification system</p>
+        </div>
+        <div class="header-right">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search criminals, IDs..." id="globalSearch">
+            </div>
+            <button class="theme-toggle" id="themeToggle">
+                <i class="fas fa-moon"></i>
+            </button>
+        </div>
+    </div>
+    
+    <div id="dynamicContent">
+        <!-- Content loads here dynamically -->
+    </div>
+</main>
+
+<!-- Login/Register Modal (Glassmorphism) -->
+<div id="glassModal" class="glass-modal">
+    <div class="glass-modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle">Login to IDLEB FPI</h3>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div id="modalLoginForm">
+            <input type="text" id="modalUsername" placeholder="Username" autocomplete="off">
+            <input type="password" id="modalPassword" placeholder="Password">
+            <button id="modalLoginBtn" class="glass-btn">Login <i class="fas fa-arrow-right"></i></button>
+            <p class="modal-switch">Don't have an account? <a href="#" id="switchToRegister">Register here</a></p>
+        </div>
+        <div id="modalRegisterForm" style="display:none;">
+            <input type="text" id="regFullName" placeholder="Full Name">
             <input type="text" id="regUsername" placeholder="Username">
             <input type="password" id="regPassword" placeholder="Password">
-            <select id="regRole">
+            <select id="regRoleSelect">
                 <option value="user">User (View only)</option>
                 <option value="officer">Officer (Search & Add)</option>
                 <option value="admin">Admin (Full Control)</option>
             </select>
-            <button id="doRegister">Register</button>
+            <button id="modalRegisterBtn" class="glass-btn">Register <i class="fas fa-user-plus"></i></button>
+            <p class="modal-switch">Already have an account? <a href="#" id="switchToLogin">Login here</a></p>
         </div>
-        <p id="authMessage"></p>
+        <div id="modalMessage" class="modal-message"></div>
     </div>
 </div>
-
-<!-- المحتوى الديناميكي -->
-<main id="mainContent">
-    <!-- سيتم ملؤه بواسطة JavaScript -->
-</main>
-
-<footer>
-    <div class="footer-content">
-        <div class="footer-logo"><h3>IDLEB <span>FPI</span></h3><p>AI for justice & safety</p></div>
-        <div class="footer-copy"><p>© 2026 IDLEB FPI </p></div>
-    </div>
-</footer>
 
 <script src="script.js"></script>
 </body>
