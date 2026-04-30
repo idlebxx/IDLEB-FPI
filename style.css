@@ -1,473 +1,599 @@
-// ========== البيانات والتخزين ==========
-let currentUser = null;
-let criminals = JSON.parse(localStorage.getItem('idleb_criminals')) || [];
-let identities = JSON.parse(localStorage.getItem('idleb_identities')) || [];
-let auditLog = JSON.parse(localStorage.getItem('idleb_audit')) || [];
-let users = JSON.parse(localStorage.getItem('idleb_users')) || [];
-
-// إنشاء مدير افتراضي إذا لم يوجد مستخدمين
-if (users.length === 0) {
-    users.push({
-        id: 1,
-        fullname: "أحمد العلي",
-        username: "admin",
-        password: "admin123",
-        role: "admin",
-        avatar: "https://randomuser.me/api/portraits/men/32.jpg"
-    });
-    users.push({
-        id: 2,
-        fullname: "محمد خالد",
-        username: "officer",
-        password: "123456",
-        role: "officer",
-        avatar: "https://randomuser.me/api/portraits/men/45.jpg"
-    });
-    localStorage.setItem('idleb_users', JSON.stringify(users));
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-// بيانات تجريبية للهويات
-if (identities.length === 0) {
-    identities.push({ nationalId: "SY1001", name: "أحمد محمود", photo: "https://randomuser.me/api/portraits/men/1.jpg", criminalMatch: true });
-    identities.push({ nationalId: "SY1002", name: "ليلى حسن", photo: "https://randomuser.me/api/portraits/women/2.jpg", criminalMatch: false });
-    identities.push({ nationalId: "SY1003", name: "عمر سليمان", photo: "https://randomuser.me/api/portraits/men/3.jpg", criminalMatch: true });
-    localStorage.setItem('idleb_identities', JSON.stringify(identities));
+body {
+    font-family: 'Cairo', sans-serif;
+    background: linear-gradient(145deg, #0a0a2a, #1a1a3a);
+    min-height: 100vh;
+    overflow-x: hidden;
 }
 
-function saveAll() {
-    localStorage.setItem('idleb_criminals', JSON.stringify(criminals));
-    localStorage.setItem('idleb_identities', JSON.stringify(identities));
-    localStorage.setItem('idleb_audit', JSON.stringify(auditLog));
-    localStorage.setItem('idleb_users', JSON.stringify(users));
+/* ========== خلفية ثلاثية الأبعاد ========== */
+.scene3d {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
 }
 
-function addLog(action, details) {
-    auditLog.unshift({
-        timestamp: new Date().toISOString(),
-        user: currentUser?.username || "مجهول",
-        action: action,
-        details: details
-    });
-    saveAll();
+.cube {
+    position: absolute;
+    top: 10%;
+    left: -10%;
+    width: 300px;
+    height: 300px;
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(250, 204, 21, 0.1));
+    transform: rotate(45deg) rotateX(45deg);
+    animation: rotateCube 20s linear infinite;
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
 }
 
-// ========== دوال العرض ==========
-function updateProfileUI() {
-    if (!currentUser) return;
-    document.getElementById('profileName').textContent = currentUser.fullname;
-    document.getElementById('profileRole').textContent = 
-        currentUser.role === 'admin' ? 'مدير النظام' : (currentUser.role === 'officer' ? 'ضابط' : 'مستخدم عادي');
-    const avatarImg = document.querySelector('#profileAvatar img');
-    if (avatarImg) avatarImg.src = currentUser.avatar || "https://randomuser.me/api/portraits/men/32.jpg";
-    document.getElementById('criminalsBadge').textContent = criminals.length;
+.cube2 {
+    position: absolute;
+    bottom: 10%;
+    right: -5%;
+    width: 250px;
+    height: 250px;
+    background: linear-gradient(135deg, rgba(250, 204, 21, 0.2), rgba(37, 99, 235, 0.1));
+    transform: rotate(30deg) rotateY(60deg);
+    animation: rotateCubeReverse 25s linear infinite;
+    border-radius: 20px;
 }
 
-function renderDashboard() {
-    const container = document.getElementById('dynamicContent3d');
-    container.innerHTML = `
-        <div class="fade-in-3d">
-            <div class="stats-grid-3d">
-                <div class="stat-card-3d">
-                    <div class="stat-icon-3d"><i class="fas fa-skull-crossbones"></i></div>
-                    <div class="stat-value-3d">${criminals.length}</div>
-                    <div class="stat-label-3d">إجمالي المجرمين</div>
-                </div>
-                <div class="stat-card-3d">
-                    <div class="stat-icon-3d"><i class="fas fa-id-card"></i></div>
-                    <div class="stat-value-3d">${identities.length}</div>
-                    <div class="stat-label-3d">الهويات الوطنية</div>
-                </div>
-                <div class="stat-card-3d">
-                    <div class="stat-icon-3d"><i class="fas fa-chart-line"></i></div>
-                    <div class="stat-value-3d">${Math.floor(Math.random() * 20 + 80)}%</div>
-                    <div class="stat-label-3d">دقة الذكاء الاصطناعي</div>
-                </div>
-                <div class="stat-card-3d">
-                    <div class="stat-icon-3d"><i class="fas fa-history"></i></div>
-                    <div class="stat-value-3d">${auditLog.length}</div>
-                    <div class="stat-label-3d">سجل العمليات</div>
-                </div>
-            </div>
-            <div class="table-container-3d">
-                <h3 style="color:white; margin-bottom:1rem;">📋 آخر المجرمين المضافة</h3>
-                <table class="table-3d">
-                    <thead>
-                        <tr><th>الاسم</th><th>الوصف</th><th>الرقم الوطني</th><th>أضيف بواسطة</th></tr>
-                    </thead>
-                    <tbody>
-                        ${criminals.slice(0, 5).map(c => `
-                            <tr><td>${c.name}</td><td>${c.desc}</td><td>${c.nid || '-'}</td><td>${c.addedBy || 'النظام'}</td></tr>
-                        `).join('')}
-                        ${criminals.length === 0 ? '<tr><td colspan="4" style="text-align:center">لا يوجد مجرمين في قاعدة البيانات</td></tr>' : ''}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
+.sphere {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.15), transparent);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulseSphere 4s ease-in-out infinite;
 }
 
-function renderSketch() {
-    const container = document.getElementById('dynamicContent3d');
-    container.innerHTML = `
-        <div class="fade-in-3d sketch-area-3d">
-            <h2 style="color:white; margin-bottom:1rem;">🤖 رسم المجرم بالذكاء الاصطناعي</h2>
-            <textarea id="sketchDesc" class="sketch-input-3d" rows="3" placeholder="صف المجرم... مثال: رجل، عمر 35، عيون خضراء، لحية، ندبة على الخد الأيسر..."></textarea>
-            <button class="btn-glass-3d" id="generateSketchBtn" style="width:100%;"><i class="fas fa-magic"></i> إنشاء رسم للوجه</button>
-            <div class="sketch-result-3d" id="sketchResult">
-                <div style="text-align:center; color:#64748b;">
-                    <i class="fas fa-user-secret" style="font-size:3rem;"></i>
-                    <p>سيظهر رسم الوجه هنا بعد الضغط على زر الإنشاء</p>
-                </div>
-            </div>
-            <p style="margin-top:1rem; color:#94a3b8; font-size:0.8rem;"><i class="fas fa-lock"></i> يتم تسجيل كل عملية رسم في سجل العمليات لأمن النظام</p>
-        </div>
-    `;
-    
-    document.getElementById('generateSketchBtn')?.addEventListener('click', () => {
-        const desc = document.getElementById('sketchDesc')?.value || "وصف غير محدد";
-        const randomId = Math.floor(Math.random() * 90);
-        const gender = Math.random() > 0.5 ? 'men' : 'women';
-        const imgUrl = `https://randomuser.me/api/portraits/${gender}/${randomId}.jpg`;
-        
-        document.getElementById('sketchResult').innerHTML = `
-            <div style="text-align:center;">
-                <img src="${imgUrl}" style="width:180px; height:180px; border-radius:50%; border:3px solid #facc15; object-fit:cover; box-shadow:0 0 30px rgba(250,204,21,0.3);">
-                <p style="margin-top:1rem; color:#2563eb;">تم إنشاء الرسم من الوصف: "${desc.substring(0, 80)}..."</p>
-            </div>
-        `;
-        addLog("رسم بالذكاء الاصطناعي", `تم إنشاء رسم من الوصف: ${desc.substring(0, 100)}`);
-        alert("تم إنشاء الرسم بنجاح ✅");
-    });
+@keyframes rotateCube {
+    0% { transform: rotate(0deg) rotateX(45deg); }
+    100% { transform: rotate(360deg) rotateX(45deg); }
 }
 
-function renderDatabase() {
-    const canAdd = currentUser?.role === 'admin' || currentUser?.role === 'officer';
-    const container = document.getElementById('dynamicContent3d');
-    container.innerHTML = `
-        <div class="fade-in-3d">
-            <div class="table-container-3d">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
-                    <h3 style="color:white;">👮 قاعدة بيانات المجرمين</h3>
-                    ${canAdd ? '<button class="btn-glass-3d" id="showAddCriminalBtn"><i class="fas fa-plus"></i> إضافة مجرم</button>' : ''}
-                </div>
-                <div id="addCriminalPanel" style="display:none; margin-bottom:1rem; padding:1rem; background:rgba(0,0,0,0.3); border-radius:16px;">
-                    <input type="text" id="newCriminalName" placeholder="الاسم الكامل" style="width:100%; padding:0.5rem; margin-bottom:0.5rem; background:rgba(0,0,0,0.5); border:1px solid #2563eb; border-radius:10px; color:white;">
-                    <input type="text" id="newCriminalDesc" placeholder="الوصف / العلامات المميزة" style="width:100%; padding:0.5rem; margin-bottom:0.5rem; background:rgba(0,0,0,0.5); border:1px solid #2563eb; border-radius:10px; color:white;">
-                    <input type="text" id="newCriminalNid" placeholder="الرقم الوطني (اختياري)" style="width:100%; padding:0.5rem; margin-bottom:0.5rem; background:rgba(0,0,0,0.5); border:1px solid #2563eb; border-radius:10px; color:white;">
-                    <button class="btn-glass-3d" id="saveCriminalBtn">حفظ المجرم</button>
-                </div>
-                <table class="table-3d">
-                    <thead>
-                        <tr><th>الاسم</th><th>الوصف</th><th>الرقم الوطني</th><th>أضيف بواسطة</th>${currentUser?.role === 'admin' ? '<th>إجراءات</th>' : ''}</tr>
-                    </thead>
-                    <tbody>
-                        ${criminals.map(c => `
-                            <tr>
-                                <td>${c.name}</td>
-                                <td>${c.desc}</td>
-                                <td>${c.nid || '-'}</td>
-                                <td>${c.addedBy || 'النظام'}</td>
-                                ${currentUser?.role === 'admin' ? `<td><button class="btn-glass-3d" onclick="deleteCriminal(${c.id})" style="padding:0.2rem 0.8rem;">حذف</button></td>` : ''}
-                            </tr>
-                        `).join('')}
-                        ${criminals.length === 0 ? '<tr><td colspan="5" style="text-align:center">لا يوجد مجرمين في قاعدة البيانات</td>*{3}' : ''}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('showAddCriminalBtn')?.addEventListener('click', () => {
-        const panel = document.getElementById('addCriminalPanel');
-        panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    });
-    
-    document.getElementById('saveCriminalBtn')?.addEventListener('click', () => {
-        const name = document.getElementById('newCriminalName').value;
-        const desc = document.getElementById('newCriminalDesc').value;
-        const nid = document.getElementById('newCriminalNid').value;
-        if (name && desc) {
-            criminals.push({
-                id: Date.now(),
-                name: name,
-                desc: desc,
-                nid: nid,
-                addedBy: currentUser?.fullname || 'مستخدم'
-            });
-            saveAll();
-            addLog("إضافة مجرم", `تمت إضافة مجرم جديد: ${name}`);
-            renderDatabase();
-            document.getElementById('criminalsBadge').textContent = criminals.length;
-            alert("تمت إضافة المجرم بنجاح ✅");
-        } else {
-            alert("الرجاء إدخال الاسم والوصف");
-        }
-    });
+@keyframes rotateCubeReverse {
+    0% { transform: rotate(0deg) rotateY(60deg); }
+    100% { transform: rotate(-360deg) rotateY(60deg); }
 }
 
-function renderIdentities() {
-    const container = document.getElementById('dynamicContent3d');
-    container.innerHTML = `
-        <div class="fade-in-3d">
-            <div class="table-container-3d">
-                <h3 style="color:white; margin-bottom:1rem;">🆔 قاعدة البيانات الوطنية</h3>
-                <div style="margin-bottom:1rem; display:flex; gap:0.5rem; flex-wrap:wrap;">
-                    <input type="text" id="searchNidInput" placeholder="البحث بالرقم الوطني" style="flex:1; padding:0.5rem; background:rgba(0,0,0,0.5); border:1px solid #2563eb; border-radius:10px; color:white;">
-                    <button class="btn-glass-3d" id="searchNidBtn">بحث</button>
-                </div>
-                <div id="searchResultArea"></div>
-                <table class="table-3d">
-                    <thead>
-                        <tr><th>الرقم الوطني</th><th>الاسم الكامل</th><th>الصورة</th><th>الحالة</th></tr>
-                    </thead>
-                    <tbody>
-                        ${identities.map(id => `
-                            <tr>
-                                <td>${id.nationalId}</td>
-                                <td>${id.name}</td>
-                                <td><img src="${id.photo}" width="45" style="border-radius:50%;"></td>
-                                <td><span style="color:${id.criminalMatch ? '#ef4444' : '#22c55e'}">${id.criminalMatch ? '⚠️ مطلوب' : '✓ نظيف'}</span></td>
-                            </tr>
-                        `).join('')}
-                    </tbody>
-                </table>
-                ${currentUser?.role === 'admin' ? '<button class="btn-glass-3d" id="seedIdsBtn" style="margin-top:1rem;"><i class="fas fa-database"></i> إضافة هويات تجريبية</button>' : ''}
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('searchNidBtn')?.addEventListener('click', () => {
-        const nid = document.getElementById('searchNidInput').value;
-        const found = identities.find(i => i.nationalId === nid);
-        const resultDiv = document.getElementById('searchResultArea');
-        if (found) {
-            resultDiv.innerHTML = `<div style="background:rgba(37,99,235,0.2); padding:1rem; border-radius:12px; margin-bottom:1rem;">
-                ✅ تم العثور على: ${found.name} - ${found.criminalMatch ? '⚠️ المطلوب أمنياً' : '✅ نظيف'}
-            </div>`;
-            addLog("بحث", `تم البحث عن الرقم الوطني: ${nid}`);
-        } else if (nid) {
-            resultDiv.innerHTML = `<div style="background:rgba(220,38,38,0.2); padding:1rem; border-radius:12px; margin-bottom:1rem;">❌ لا توجد هوية بهذا الرقم: ${nid}</div>`;
-        }
-    });
-    
-    document.getElementById('seedIdsBtn')?.addEventListener('click', () => {
-        const newId = `SY${1000 + identities.length + 1}`;
-        identities.push({
-            nationalId: newId,
-            name: `هوية تجريبية ${identities.length + 1}`,
-            photo: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 90)}.jpg`,
-            criminalMatch: Math.random() > 0.7
-        });
-        saveAll();
-        renderIdentities();
-        addLog("إضافة هوية", `تمت إضافة هوية تجريبية: ${newId}`);
-        alert("تمت إضافة هوية تجريبية ✅");
-    });
+@keyframes pulseSphere {
+    0%, 100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
+    50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.1); }
 }
 
-function renderAudit() {
-    const container = document.getElementById('dynamicContent3d');
-    container.innerHTML = `
-        <div class="fade-in-3d">
-            <div class="table-container-3d">
-                <h3 style="color:white; margin-bottom:1rem;">📜 سجل العمليات (${auditLog.length} عملية)</h3>
-                <table class="table-3d">
-                    <thead>
-                        <tr><th>التاريخ والوقت</th><th>المستخدم</th><th>الإجراء</th><th>التفاصيل</th></tr>
-                    </thead>
-                    <tbody>
-                        ${auditLog.map(log => `
-                            <tr>
-                                <td>${new Date(log.timestamp).toLocaleString('ar-EG')}</td>
-                                <td>${log.user}</td>
-                                <td>${log.action}</td>
-                                <td>${log.details}</td>
-                            </tr>
-                        `).join('')}
-                        ${auditLog.length === 0 ? '<tr><td colspan="4" style="text-align:center">لا توجد سجلات بعد</td>' : ''}
-                    </tbody>
-                </table>
-                ${currentUser?.role === 'admin' ? '<button class="btn-glass-3d" id="clearAuditBtn" style="margin-top:1rem; background:linear-gradient(135deg,#dc2626,#991b1b);"><i class="fas fa-trash"></i> مسح سجل العمليات</button>' : ''}
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('clearAuditBtn')?.addEventListener('click', () => {
-        if (confirm('هل أنت متأكد من مسح جميع سجلات العمليات؟')) {
-            auditLog = [];
-            saveAll();
-            renderAudit();
-            addLog("مسح السجل", "تم مسح سجل العمليات بالكامل بواسطة المدير");
-            alert("تم مسح السجل بنجاح ✅");
-        }
-    });
+/* ========== واجهة تسجيل الدخول ========== */
+.auth-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(15px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
 }
 
-function renderAnalytics() {
-    const container = document.getElementById('dynamicContent3d');
-    container.innerHTML = `
-        <div class="fade-in-3d">
-            <div class="stats-grid-3d">
-                <div class="stat-card-3d"><div class="stat-icon-3d"><i class="fas fa-user-slash"></i></div><div class="stat-value-3d">${criminals.length}</div><div class="stat-label-3d">إجمالي المجرمين</div></div>
-                <div class="stat-card-3d"><div class="stat-icon-3d"><i class="fas fa-flag-checkered"></i></div><div class="stat-value-3d">${identities.filter(i => i.criminalMatch).length}</div><div class="stat-label-3d">المطلوبين أمنياً</div></div>
-                <div class="stat-card-3d"><div class="stat-icon-3d"><i class="fas fa-chart-simple"></i></div><div class="stat-value-3d">${auditLog.length}</div><div class="stat-label-3d">إجمالي العمليات</div></div>
-                <div class="stat-card-3d"><div class="stat-icon-3d"><i class="fas fa-users"></i></div><div class="stat-value-3d">${users.length}</div><div class="stat-label-3d">مستخدمي النظام</div></div>
-            </div>
-            <div class="table-container-3d">
-                <h3 style="color:white;">📊 ملخص النظام</h3>
-                <table class="table-3d">
-                    <tr><th>المؤشر</th><th>القيمة</th></tr>
-                    <tr><td>إجمالي المجرمين</td><td>${criminals.length}</td></tr>
-                    <tr><td>الهويات النظيفة</td><td>${identities.filter(i => !i.criminalMatch).length}</td></tr>
-                    <tr><td>الهويات المطلوبة</td><td>${identities.filter(i => i.criminalMatch).length}</td></tr>
-                    <tr><td>عدد المستخدمين</td><td>${users.length}</td></tr>
-                    <tr><td>عدد العمليات المسجلة</td><td>${auditLog.length}</td></tr>
-                </table>
-            </div>
-        </div>
-    `;
+.auth-card-3d {
+    background: rgba(20, 20, 50, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 40px;
+    padding: 2.5rem;
+    width: 90%;
+    max-width: 450px;
+    text-align: center;
+    border: 1px solid rgba(37, 99, 235, 0.5);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(37, 99, 235, 0.3);
+    animation: cardFloat 0.5s ease-out;
 }
 
-// ========== دوال التنقل ==========
-function loadSection(sectionId) {
-    document.getElementById('pageTitle3d').textContent = 
-        sectionId === 'dashboard' ? 'لوحة التحكم الرئيسية' :
-        sectionId === 'sketch' ? 'رسم المجرم بالذكاء الاصطناعي' :
-        sectionId === 'database' ? 'قاعدة بيانات المجرمين' :
-        sectionId === 'identities' ? 'الهويات الوطنية' :
-        sectionId === 'audit' ? 'سجل العمليات' :
-        sectionId === 'analytics' ? 'الإحصائيات' : 'لوحة التحكم';
-    
-    if (sectionId === 'dashboard') renderDashboard();
-    else if (sectionId === 'sketch') renderSketch();
-    else if (sectionId === 'database') renderDatabase();
-    else if (sectionId === 'identities') renderIdentities();
-    else if (sectionId === 'audit') renderAudit();
-    else if (sectionId === 'analytics') renderAnalytics();
-}
-
-// ========== دوال تسجيل الدخول والخروج ==========
-function showMainApp() {
-    document.getElementById('authOverlay').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
-    updateProfileUI();
-    renderDashboard();
-}
-
-function logout() {
-    currentUser = null;
-    localStorage.removeItem('idleb_current_session');
-    document.getElementById('authOverlay').style.display = 'flex';
-    document.getElementById('mainApp').style.display = 'none';
-    document.getElementById('loginUser').value = '';
-    document.getElementById('loginPass').value = '';
-}
-
-// أحداث تسجيل الدخول والتسجيل
-document.getElementById('doLoginBtn')?.addEventListener('click', () => {
-    const username = document.getElementById('loginUser').value;
-    const password = document.getElementById('loginPass').value;
-    const user = users.find(u => u.username === username && u.password === password);
-    
-    if (user) {
-        currentUser = user;
-        localStorage.setItem('idleb_current_session', JSON.stringify(currentUser));
-        addLog("تسجيل دخول", `تم تسجيل دخول المستخدم: ${user.fullname}`);
-        showMainApp();
-    } else {
-        document.getElementById('authMessage').textContent = '❌ اسم المستخدم أو كلمة المرور غير صحيحة';
+@keyframes cardFloat {
+    from {
+        opacity: 0;
+        transform: translateY(50px) rotateX(10deg);
     }
-});
-
-document.getElementById('doRegisterBtn')?.addEventListener('click', () => {
-    const fullname = document.getElementById('regFullName').value;
-    const username = document.getElementById('regUser').value;
-    const password = document.getElementById('regPass').value;
-    const role = document.getElementById('regRole').value;
-    
-    if (fullname && username && password) {
-        if (users.find(u => u.username === username)) {
-            document.getElementById('authMessage').textContent = '❌ اسم المستخدم موجود مسبقاً';
-            return;
-        }
-        
-        const newUser = {
-            id: Date.now(),
-            fullname: fullname,
-            username: username,
-            password: password,
-            role: role,
-            avatar: `https://randomuser.me/api/portraits/${Math.random() > 0.5 ? 'men' : 'women'}/${Math.floor(Math.random() * 90)}.jpg`
-        };
-        users.push(newUser);
-        saveAll();
-        document.getElementById('authMessage').textContent = '✅ تم إنشاء الحساب بنجاح! يمكنك تسجيل الدخول الآن';
-        document.getElementById('authMessage').style.color = '#22c55e';
-        
-        // تبديل إلى لوحة تسجيل الدخول
-        document.getElementById('loginPanel').style.display = 'block';
-        document.getElementById('registerPanel').style.display = 'none';
-        document.getElementById('loginUser').value = username;
-    } else {
-        document.getElementById('authMessage').textContent = '❌ الرجاء ملء جميع الحقول';
+    to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
     }
-});
-
-// تبديل بين لوحتي تسجيل الدخول والتسجيل
-document.getElementById('showRegister')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    document.getElementById('loginPanel').style.display = 'none';
-    document.getElementById('registerPanel').style.display = 'block';
-    document.getElementById('authMessage').textContent = '';
-});
-
-document.getElementById('showLogin')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    document.getElementById('loginPanel').style.display = 'block';
-    document.getElementById('registerPanel').style.display = 'none';
-    document.getElementById('authMessage').textContent = '';
-});
-
-// أحداث التنقل في الشريط الجانبي
-document.querySelectorAll('.nav-item-3d').forEach(item => {
-    item.addEventListener('click', (e) => {
-        e.preventDefault();
-        const section = item.getAttribute('data-section');
-        document.querySelectorAll('.nav-item-3d').forEach(nav => nav.classList.remove('active'));
-        item.classList.add('active');
-        loadSection(section);
-    });
-});
-
-document.getElementById('logoutBtn3d')?.addEventListener('click', logout);
-
-// البحث العام
-document.getElementById('globalSearch3d')?.addEventListener('input', (e) => {
-    const query = e.target.value.toLowerCase();
-    if (document.querySelector('.table-3d')) {
-        const rows = document.querySelectorAll('.table-3d tbody tr');
-        rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(query) ? '' : 'none';
-        });
-    }
-});
-
-// التحقق من وجود جلسة سابقة
-const savedSession = localStorage.getItem('idleb_current_session');
-if (savedSession) {
-    currentUser = JSON.parse(savedSession);
-    showMainApp();
 }
 
-// دالة حذف المجرمين (للمدير)
-window.deleteCriminal = (id) => {
-    if (currentUser?.role === 'admin') {
-        criminals = criminals.filter(c => c.id !== id);
-        saveAll();
-        addLog("حذف مجرم", `تم حذف مجرم برقم ID: ${id}`);
-        renderDatabase();
-        document.getElementById('criminalsBadge').textContent = criminals.length;
-        alert("تم حذف المجرم بنجاح ✅");
+.large-avatar {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    border: 3px solid #facc15;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(250, 204, 21, 0.5);
+}
+
+.large-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.auth-card-3d h2 {
+    color: #facc15;
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.auth-card-3d p {
+    color: #94a3b8;
+    margin-bottom: 1.5rem;
+}
+
+.input-group-3d {
+    position: relative;
+    margin-bottom: 1.2rem;
+}
+
+.input-group-3d i {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #2563eb;
+}
+
+.input-group-3d input,
+.input-group-3d select {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    border-radius: 30px;
+    color: white;
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.input-group-3d input:focus,
+.input-group-3d select:focus {
+    outline: none;
+    border-color: #facc15;
+    box-shadow: 0 0 15px rgba(250, 204, 21, 0.3);
+}
+
+.input-group-3d select option {
+    background: #1a1a3a;
+}
+
+.btn-3d {
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    border: none;
+    border-radius: 30px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 0.5rem;
+}
+
+.btn-3d:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 25px rgba(37, 99, 235, 0.4);
+}
+
+.switch-auth {
+    margin-top: 1.2rem;
+    color: #94a3b8;
+}
+
+.switch-auth a {
+    color: #facc15;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.auth-message {
+    margin-top: 1rem;
+    color: #ef4444;
+    font-size: 0.85rem;
+}
+
+/* ========== واجهة التطبيق الرئيسية (بعد الدخول) ========== */
+.sidebar-3d {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 280px;
+    height: 100vh;
+    background: linear-gradient(135deg, rgba(10, 10, 42, 0.98), rgba(20, 20, 60, 0.98));
+    backdrop-filter: blur(10px);
+    border-left: 1px solid rgba(37, 99, 235, 0.3);
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    transform: translateX(0);
+    transition: transform 0.3s;
+}
+
+.profile-section {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-avatar-large {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1rem;
+    position: relative;
+}
+
+.profile-avatar-large img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #facc15;
+    box-shadow: 0 0 25px rgba(250, 204, 21, 0.4);
+}
+
+.online-badge {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    width: 18px;
+    height: 18px;
+    background: #22c55e;
+    border-radius: 50%;
+    border: 2px solid #1a1a3a;
+}
+
+.profile-section h3 {
+    color: white;
+    font-size: 1.2rem;
+}
+
+.role-badge-3d {
+    display: inline-block;
+    padding: 0.2rem 1rem;
+    background: rgba(37, 99, 235, 0.3);
+    border-radius: 20px;
+    color: #facc15;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.nav-3d {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nav-item-3d {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 15px;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: all 0.3s;
+    position: relative;
+}
+
+.nav-item-3d i {
+    width: 24px;
+    font-size: 1.2rem;
+}
+
+.nav-item-3d span {
+    flex: 1;
+}
+
+.nav-item-3d.active {
+    background: linear-gradient(135deg, rgba(37, 99, 235, 0.3), rgba(37, 99, 235, 0.1));
+    color: #facc15;
+    border-right: 3px solid #facc15;
+    transform: translateX(-5px);
+}
+
+.nav-item-3d:hover:not(.active) {
+    background: rgba(37, 99, 235, 0.2);
+    color: white;
+    transform: translateX(-5px);
+}
+
+.nav-badge-3d {
+    background: #2563eb;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+}
+
+.logout-btn-3d {
+    width: 100%;
+    padding: 0.8rem;
+    background: rgba(220, 38, 38, 0.2);
+    border: 1px solid #ef4444;
+    border-radius: 30px;
+    color: #ef4444;
+    font-family: 'Cairo', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 1rem;
+}
+
+.logout-btn-3d:hover {
+    background: #ef4444;
+    color: white;
+}
+
+/* المحتوى الرئيسي */
+.main-content-3d {
+    margin-right: 280px;
+    padding: 2rem;
+    min-height: 100vh;
+}
+
+.content-header-3d {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.content-header-3d h1 {
+    color: white;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.search-box-3d {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 40px;
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+.search-box-3d i {
+    color: #94a3b8;
+}
+
+.search-box-3d input {
+    background: transparent;
+    border: none;
+    color: white;
+    outline: none;
+    padding: 0.3rem;
+    width: 200px;
+    font-family: 'Cairo', sans-serif;
+}
+
+/* بطاقات إحصاءات 3D */
+.stats-grid-3d {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card-3d {
+    background: rgba(20, 20, 50, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    padding: 1.5rem;
+    text-align: center;
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    transition: all 0.3s;
+    transform-style: preserve-3d;
+}
+
+.stat-card-3d:hover {
+    transform: translateY(-5px) rotateX(5deg);
+    border-color: #facc15;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+}
+
+.stat-icon-3d {
+    font-size: 2.5rem;
+    color: #2563eb;
+    margin-bottom: 0.5rem;
+}
+
+.stat-value-3d {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #facc15;
+}
+
+.stat-label-3d {
+    color: #94a3b8;
+    font-size: 0.85rem;
+}
+
+/* الجداول */
+.table-container-3d {
+    background: rgba(20, 20, 50, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    padding: 1.5rem;
+    overflow-x: auto;
+    border: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+.table-3d {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-3d th {
+    text-align: right;
+    padding: 1rem;
+    color: #facc15;
+    font-weight: 700;
+    border-bottom: 1px solid rgba(37, 99, 235, 0.3);
+}
+
+.table-3d td {
+    padding: 0.8rem 1rem;
+    color: #cbd5e1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.table-3d tr:hover {
+    background: rgba(37, 99, 235, 0.1);
+}
+
+/* أزرار */
+.btn-glass-3d {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    border: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: 30px;
+    color: white;
+    font-family: 'Cairo', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-glass-3d:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4);
+}
+
+/* منطقة رسم الذكاء الاصطناعي */
+.sketch-area-3d {
+    background: rgba(20, 20, 50, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 25px;
+    padding: 2rem;
+    text-align: center;
+}
+
+.sketch-input-3d {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(37, 99, 235, 0.3);
+    border-radius: 20px;
+    color: white;
+    font-family: 'Cairo', sans-serif;
+    margin-bottom: 1rem;
+    resize: vertical;
+}
+
+.sketch-result-3d {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    min-height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #2563eb;
+    margin-top: 1rem;
+}
+
+/* استجابة للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .sidebar-3d {
+        width: 80px;
+        padding: 1rem 0.5rem;
     }
-};
+    
+    .sidebar-3d .profile-section h3,
+    .sidebar-3d .profile-section .role-badge-3d,
+    .sidebar-3d .nav-item-3d span,
+    .logout-btn-3d span {
+        display: none;
+    }
+    
+    .sidebar-3d .nav-item-3d {
+        justify-content: center;
+    }
+    
+    .sidebar-3d .nav-item-3d i {
+        margin: 0;
+    }
+    
+    .main-content-3d {
+        margin-right: 80px;
+        padding: 1rem;
+    }
+    
+    .stats-grid-3d {
+        grid-template-columns: 1fr;
+    }
+    
+    .content-header-3d {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .search-box-3d {
+        width: 100%;
+    }
+    
+    .search-box-3d input {
+        width: 100%;
+    }
+}
+
+/* رسوم متحركة */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in-3d {
+    animation: fadeInUp 0.5s ease-out;
+}
+
+/* تخصيص شريط التمرير */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1a3a;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #2563eb;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #facc15;
+    }
