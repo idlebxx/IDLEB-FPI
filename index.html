@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDLEB FPI </title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+<div class="top-bar">
+    <span><i class="fas fa-shield-alt"></i> Official Syrian AI Crime Prevention</span>
+    <span id="userStatus"><i class="fas fa-user-lock"></i> Not logged in</span>
+</div>
+
+<header>
+    <div class="logo-area">
+        <div class="avatar-circle">
+            <img src="https://i.postimg.cc/hGtg4Kx3/IMG-20260430-084400-653.jpg" alt="IDLEB Director">
+        </div>
+        <div class="logo-text">
+            <h1>IDLEB <span>FPI</span></h1>
+            <p>Forensic Pattern Intelligence</p>
+        </div>
+    </div>
+    <nav>
+        <ul>
+            <li><a href="#" data-page="home" class="active">Home</a></li>
+            <li><a href="#" data-page="dashboard">Dashboard</a></li>
+            <li><a href="#" data-page="database">Database</a></li>
+            <li><a href="#" data-page="audit">Audit Log</a></li>
+        </ul>
+    </nav>
+    <div class="header-actions" id="authButtons">
+        <button class="btn-outline" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login</button>
+        <button class="btn-primary" id="registerBtn"><i class="fas fa-user-plus"></i> Register</button>
+        <button class="btn-outline" id="logoutBtn" style="display:none;"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+</header>
+
+<!-- Modal لنماذج التسجيل وتسجيل الدخول -->
+<div id="authModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="loginForm">
+            <h3>Login to IDLEB FPI</h3>
+            <input type="text" id="loginUsername" placeholder="Username">
+            <input type="password" id="loginPassword" placeholder="Password">
+            <button id="doLogin">Login</button>
+        </div>
+        <div id="registerForm" style="display:none;">
+            <h3>Register New Account</h3>
+            <input type="text" id="regFullname" placeholder="Full Name">
+            <input type="text" id="regUsername" placeholder="Username">
+            <input type="password" id="regPassword" placeholder="Password">
+            <select id="regRole">
+                <option value="user">User (View only)</option>
+                <option value="officer">Officer (Search & Add)</option>
+                <option value="admin">Admin (Full Control)</option>
+            </select>
+            <button id="doRegister">Register</button>
+        </div>
+        <p id="authMessage"></p>
+    </div>
+</div>
+
+<!-- المحتوى الديناميكي -->
+<main id="mainContent">
+    <!-- سيتم ملؤه بواسطة JavaScript -->
+</main>
+
+<footer>
+    <div class="footer-content">
+        <div class="footer-logo"><h3>IDLEB <span>FPI</span></h3><p>AI for justice & safety</p></div>
+        <div class="footer-copy"><p>© 2026 IDLEB FPI </p></div>
+    </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
