@@ -1,134 +1,144 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IDLEB FPI | ULTRA AI Security System</title>
+    <title>إدلب FPI | نظام الذكاء الاصطناعي </title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
 
-<!-- Animated Background -->
-<div class="bg-animation">
-    <div class="grid-overlay"></div>
-    <div class="particles"></div>
+<!-- خلفية ثلاثية الأبعاد -->
+<div class="scene3d">
+    <div class="cube"></div>
+    <div class="cube2"></div>
+    <div class="sphere"></div>
 </div>
 
-<!-- Sidebar Navigation -->
-<aside class="sidebar">
-    <div class="sidebar-header">
-        <div class="logo-icon">
-            <i class="fas fa-shield-virus"></i>
-        </div>
-        <div class="logo-text">
-            <h2>IDLEB <span>FPI</span></h2>
-            <p>v4.0 • SECURE</p>
-        </div>
-    </div>
-    
-    <nav class="sidebar-nav">
-        <a href="#" data-page="home" class="nav-item active">
-            <i class="fas fa-home"></i>
-            <span>Dashboard</span>
-            <div class="nav-badge">Live</div>
-        </a>
-        <a href="#" data-page="sketch" class="nav-item">
-            <i class="fas fa-robot"></i>
-            <span>AI Sketch</span>
-        </a>
-        <a href="#" data-page="database" class="nav-item">
-            <i class="fas fa-database"></i>
-            <span>Criminals DB</span>
-            <div class="nav-badge" id="criminalCount">0</div>
-        </a>
-        <a href="#" data-page="identities" class="nav-item">
-            <i class="fas fa-id-card"></i>
-            <span>National IDs</span>
-        </a>
-        <a href="#" data-page="audit" class="nav-item">
-            <i class="fas fa-history"></i>
-            <span>Audit Log</span>
-        </a>
-        <a href="#" data-page="analytics" class="nav-item">
-            <i class="fas fa-chart-line"></i>
-            <span>Analytics</span>
-        </a>
-    </nav>
-    
-    <div class="sidebar-footer">
-        <div class="user-info" id="sidebarUserInfo">
-            <div class="avatar-sm">
-                <img src="https://i.postimg.cc/hGtg4Kx3/IMG-20260430-084400-653.jpg" alt="User">
+<!-- واجهة تسجيل الدخول / إنشاء حساب -->
+<div class="auth-overlay" id="authOverlay">
+    <div class="auth-card-3d">
+        <div class="auth-header">
+            <div class="large-avatar">
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="مدير النظام" id="mainAvatar">
             </div>
-            <div class="user-details">
-                <span id="userNameDisplay">Guest</span>
-                <small id="userRoleDisplay">Not logged in</small>
-            </div>
+            <h2>نظام إدلب FPI</h2>
+            <p>الذكاء الاصطناعي للتعرف على المجرمين</p>
         </div>
-        <button class="logout-btn" id="sidebarLogoutBtn" style="display:none;">
-            <i class="fas fa-sign-out-alt"></i>
-            Logout
-        </button>
-        <button class="login-btn" id="sidebarLoginBtn">
-            <i class="fas fa-key"></i>
-            Login
-        </button>
-    </div>
-</aside>
-
-<!-- Main Content -->
-<main class="main-content">
-    <div class="content-header">
-        <div class="header-left">
-            <h1 id="pageTitle">Intelligence Dashboard</h1>
-            <p id="pageSubtitle">Real-time criminal identification system</p>
-        </div>
-        <div class="header-right">
-            <div class="search-box">
-                <i class="fas fa-search"></i>
-                <input type="text" placeholder="Search criminals, IDs..." id="globalSearch">
+        
+        <!-- نموذج تسجيل الدخول -->
+        <div id="loginPanel">
+            <div class="input-group-3d">
+                <i class="fas fa-user"></i>
+                <input type="text" id="loginUser" placeholder="اسم المستخدم">
             </div>
-            <button class="theme-toggle" id="themeToggle">
-                <i class="fas fa-moon"></i>
+            <div class="input-group-3d">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="loginPass" placeholder="كلمة المرور">
+            </div>
+            <button class="btn-3d" id="doLoginBtn">
+                <i class="fas fa-sign-in-alt"></i>
+                دخول
             </button>
+            <p class="switch-auth">ليس لديك حساب؟ <a href="#" id="showRegister">إنشاء حساب جديد</a></p>
         </div>
+        
+        <!-- نموذج إنشاء حساب -->
+        <div id="registerPanel" style="display:none;">
+            <div class="input-group-3d">
+                <i class="fas fa-user-circle"></i>
+                <input type="text" id="regFullName" placeholder="الاسم الكامل">
+            </div>
+            <div class="input-group-3d">
+                <i class="fas fa-user"></i>
+                <input type="text" id="regUser" placeholder="اسم المستخدم">
+            </div>
+            <div class="input-group-3d">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="regPass" placeholder="كلمة المرور">
+            </div>
+            <div class="input-group-3d">
+                <i class="fas fa-shield-alt"></i>
+                <select id="regRole">
+                    <option value="user">مستخدم عادي</option>
+                    <option value="officer">ضابط</option>
+                    <option value="admin">مدير النظام</option>
+                </select>
+            </div>
+            <button class="btn-3d" id="doRegisterBtn">
+                <i class="fas fa-user-plus"></i>
+                إنشاء حساب
+            </button>
+            <p class="switch-auth">لديك حساب؟ <a href="#" id="showLogin">تسجيل الدخول</a></p>
+        </div>
+        
+        <div id="authMessage" class="auth-message"></div>
     </div>
-    
-    <div id="dynamicContent">
-        <!-- Content loads here dynamically -->
-    </div>
-</main>
+</div>
 
-<!-- Login/Register Modal (Glassmorphism) -->
-<div id="glassModal" class="glass-modal">
-    <div class="glass-modal-content">
-        <div class="modal-header">
-            <h3 id="modalTitle">Login to IDLEB FPI</h3>
-            <button class="modal-close">&times;</button>
+<!-- المحتوى الرئيسي (يظهر بعد تسجيل الدخول) -->
+<div id="mainApp" style="display:none;">
+    <!-- شريط جانبي 3D -->
+    <aside class="sidebar-3d">
+        <div class="profile-section">
+            <div class="profile-avatar-large" id="profileAvatar">
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="صورة شخصية">
+                <div class="online-badge"></div>
+            </div>
+            <h3 id="profileName">اسم المستخدم</h3>
+            <span class="role-badge-3d" id="profileRole">مدير</span>
         </div>
-        <div id="modalLoginForm">
-            <input type="text" id="modalUsername" placeholder="Username" autocomplete="off">
-            <input type="password" id="modalPassword" placeholder="Password">
-            <button id="modalLoginBtn" class="glass-btn">Login <i class="fas fa-arrow-right"></i></button>
-            <p class="modal-switch">Don't have an account? <a href="#" id="switchToRegister">Register here</a></p>
+        
+        <nav class="nav-3d">
+            <a href="#" data-section="dashboard" class="nav-item-3d active">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>لوحة التحكم</span>
+            </a>
+            <a href="#" data-section="sketch" class="nav-item-3d">
+                <i class="fas fa-robot"></i>
+                <span>رسم المجرم بالذكاء الاصطناعي</span>
+            </a>
+            <a href="#" data-section="database" class="nav-item-3d">
+                <i class="fas fa-database"></i>
+                <span>قاعدة بيانات المجرمين</span>
+                <span class="nav-badge-3d" id="criminalsBadge">0</span>
+            </a>
+            <a href="#" data-section="identities" class="nav-item-3d">
+                <i class="fas fa-id-card"></i>
+                <span>الهويات الوطنية</span>
+            </a>
+            <a href="#" data-section="audit" class="nav-item-3d">
+                <i class="fas fa-history"></i>
+                <span>سجل العمليات</span>
+            </a>
+            <a href="#" data-section="analytics" class="nav-item-3d">
+                <i class="fas fa-chart-line"></i>
+                <span>الإحصائيات</span>
+            </a>
+        </nav>
+        
+        <button class="logout-btn-3d" id="logoutBtn3d">
+            <i class="fas fa-sign-out-alt"></i>
+            تسجيل خروج
+        </button>
+    </aside>
+    
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content-3d">
+        <div class="content-header-3d">
+            <h1 id="pageTitle3d">لوحة التحكم الرئيسية</h1>
+            <div class="search-box-3d">
+                <i class="fas fa-search"></i>
+                <input type="text" id="globalSearch3d" placeholder="بحث في قاعدة المجرمين...">
+            </div>
         </div>
-        <div id="modalRegisterForm" style="display:none;">
-            <input type="text" id="regFullName" placeholder="Full Name">
-            <input type="text" id="regUsername" placeholder="Username">
-            <input type="password" id="regPassword" placeholder="Password">
-            <select id="regRoleSelect">
-                <option value="user">User (View only)</option>
-                <option value="officer">Officer (Search & Add)</option>
-                <option value="admin">Admin (Full Control)</option>
-            </select>
-            <button id="modalRegisterBtn" class="glass-btn">Register <i class="fas fa-user-plus"></i></button>
-            <p class="modal-switch">Already have an account? <a href="#" id="switchToLogin">Login here</a></p>
+        
+        <div id="dynamicContent3d">
+            <!-- سيتم تعبئته -->
         </div>
-        <div id="modalMessage" class="modal-message"></div>
-    </div>
+    </main>
 </div>
 
 <script src="script.js"></script>
